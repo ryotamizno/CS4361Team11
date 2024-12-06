@@ -1,0 +1,101 @@
+//This is the clanka implementation of a visplane. 
+//use only for enrichment 
+
+
+import javax.swing.*;
+import java.awt.Graphics;
+import java.awt.event.*;
+import java.awt.Dimension;
+
+class visplane {
+
+
+	private float endX;
+	private float endY;
+	private float negX;
+	private float negY;
+	private float PIOverFour = (float) Math.PI/4.0F;
+
+
+
+	//dont fret it is only y=mx+b
+	private boolean calculateView(float x, float y, float xbound, float ybound, float rads){
+		
+
+	float m = (float) Math.sin(rads + PIOverFour);
+
+	float notM = (float) Math.sin(rads - PIOverFour);
+							
+	if (m == 0){
+		if (rads < Math.PI){				//bear with me here, this handles when the slope 
+			endX = -xbound;				//becomes 0. I dont know the possiblity of it 
+			endY = y;				//happening in JVM but i dont want t0 deal with it
+		}else{
+			endX = xbound;
+			endY = y;
+		}	
+	}
+	if (notM == 0){
+		if (rads < (float) Math.PI/2.0F){
+			endX = xbound;
+			endY = y; 
+		}else{
+			endX = -xbound;
+			endY = y;
+		}
+	}
+
+	if (notM == 0 || m == 0){					//special case 
+		return false;
+	}
+								
+	if(rads > (float) Math.PI/2 && rads < (float) (Math.PI*3)/2){			//check quadrant
+		xbound = -xbound;
+			
+	}	
+
+	if (rads > Math.PI){
+		ybound = -ybound;
+	}
+
+	float intercept = y - (m*x); 
+	
+	float outercept = y - (notM*x);
+
+	float Xhit = (ybound-intercept)/m;  //these are the x intercept on the top and bottom of the bbox
+
+	float Xint = (ybound-outercept)/notM;
+
+	if (Math.abs(Xhit) < Math.abs(xbound)){  //NO! it flew past the bbox! no matter we adjust for that
+		endX = Xhit;	
+		endY = ybound;
+	}else{
+		endX = xbound;
+		endY = m*xbound + intercept;
+	}	
+
+	if (Math.abs(Xint) < Math.abs(xbound)){
+		negX = Xint;	
+		negY = ybound;
+	}else{
+		negX = xbound;
+		negY = notM*xbound + outercept; 
+	}
+
+
+
+
+	}
+	
+
+	public float[] getEnds(){
+		
+		return new float[]{endX, endY, negX, negY};
+	
+	}
+
+
+}
+
+
+
